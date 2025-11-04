@@ -163,6 +163,10 @@ class Window:
         Height = Bottom - Top
         return int(Width), int(Height)
 
+    @classmethod
+    def moveForeground(cls):
+        win32gui.SetForegroundWindow(Process.WindowHandle())
+
 
 class Memory:
     __Kernal32 = ctypes.windll.LoadLibrary(r"C:\Windows\System32\kernel32.dll")
@@ -316,4 +320,4 @@ Window.Initialize()
 
 
 if __name__ == '__main__':
-    Chat.SendMessage("你好")
+    pass

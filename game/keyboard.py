@@ -140,7 +140,7 @@ class Keyboard:
                 cls.__pressed_keys.add(key)
 
     @classmethod
-    def ReleasePressedKeys(cls):
+    def Reset(cls):
         """释放所有按下的按键"""
         for key in list(cls.__pressed_keys):
             cls.__Release(key)

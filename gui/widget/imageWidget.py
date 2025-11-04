@@ -22,7 +22,7 @@ class ImageWidget(QLabel):
         super().__init__(parent)
         self.__pixmap = None
 
-        self.setFixedSize(512, 288)
+        self.setFixedSize(256, 144)
 
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.captureGame)
