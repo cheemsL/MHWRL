@@ -82,9 +82,6 @@ class Process:
         cls.__ProcessHandle = win32api.OpenProcess(
             0x1F0FFF, True, cls.__ProcessId
         )
-        print(f"WindowHandle: {cls.__WindowHandle}")
-        print(f"ProcessId: {cls.__ProcessId}")
-        print(f"ProcessHandle: {cls.__ProcessHandle}")
 
     @classmethod
     def FindWindow(cls) -> int:
