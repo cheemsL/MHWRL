@@ -3,3 +3,4 @@ opencv-python
 psutil
 pywin32
 Pyside6
+vgamepad

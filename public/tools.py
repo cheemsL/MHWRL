@@ -25,5 +25,6 @@ class QuitEvent:
         for func, args, kwargs in cls.__CallList:
             func(*args, **kwargs)
 
+
 atexit.register(QuitEvent.Execute)
 
