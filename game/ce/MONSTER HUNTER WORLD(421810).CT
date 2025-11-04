@@ -1245,6 +1245,16 @@ MonsterHunterWorld.exe+11B8984 - 85 D2                 - test edx,edx
             </CheatEntry>
           </CheatEntries>
         </CheatEntry>
+        <CheatEntry>
+          <ID>165</ID>
+          <Description>"世界时间(0~23)"</Description>
+          <ShowAsSigned>0</ShowAsSigned>
+          <VariableType>Float</VariableType>
+          <Address>145013830</Address>
+          <Offsets>
+            <Offset>38</Offset>
+          </Offsets>
+        </CheatEntry>
       </CheatEntries>
     </CheatEntry>
   </CheatEntries>
