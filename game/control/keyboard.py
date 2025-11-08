@@ -82,6 +82,19 @@ class Key:
     N = 0x31
     M = 0x32
 
+    F1 = 0x3B
+    F2 = 0x3C
+    F3 = 0x3D
+    F4 = 0x3E
+    F5 = 0x3F
+    F6 = 0x40
+    F7 = 0x41
+    F8 = 0x42
+    F9 = 0x43
+    F10 = 0x44
+    F11 = 0x57
+    F12 = 0x58
+
     # 功能键
     Esc = 0x01      # 退出键
     Tab = 0x0F      # 制表键
@@ -98,7 +111,7 @@ class Keyboard:
     def Click(cls, key):
         def __click():
             cls.__Press(key)
-            time.sleep(0.1)
+            time.sleep(0.01)
             cls.__Release(key)
         threat = Thread(target=__click)
         threat.daemon = True
@@ -155,4 +168,17 @@ class Keyboard:
 
 
 if __name__ == '__main__':
-    Keyboard.Click(Key.Space)
+    import time
+    from game import MonsterHunterWorld
+    MonsterHunterWorld.Window.moveForeground()
+    time.sleep(1)
+    MonsterHunterWorld.Process.Suspend()
+    time.sleep(1)
+    MonsterHunterWorld.Process.Resume()
+    Keyboard.Click(Key.F11)
+    time.sleep(0.03)
+    time.sleep(1)
+    MonsterHunterWorld.Process.Suspend()
+    time.sleep(1)
+    MonsterHunterWorld.Process.Resume()
+    time.sleep(2)

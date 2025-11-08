@@ -17,6 +17,7 @@ from typing import (
     Union,
     Tuple,
     Optional,
+    List
 )
 
 
@@ -82,6 +83,7 @@ class Process:
         cls.__ProcessHandle = win32api.OpenProcess(
             0x1F0FFF, True, cls.__ProcessId
         )
+        cls.__Process = psutil.Process(cls.ProcessId())
 
     @classmethod
     def FindWindow(cls) -> int:
@@ -180,14 +182,6 @@ class Memory:
         return data.value
 
     @classmethod
-    def ReadAddress(cls, *addresses: hex):
-        address = addresses[0]
-        for bias in addresses[1:]:
-            address = cls.ReadLong(address)
-            address += bias
-        return address
-    
-    @classmethod
     def __WriteIntoMemory(cls, address: hex, data, length: int):
         cls.__Kernal32.WriteProcessMemory(
             int(Process.ProcessHandle()),
@@ -196,7 +190,15 @@ class Memory:
             length,
             None
         )
-    
+
+    @classmethod
+    def ReadAddress(cls, *addresses: hex):
+        address = addresses[0]
+        for bias in addresses[1:]:
+            address = cls.ReadLong(address)
+            address += bias
+        return address
+
     @classmethod
     def ReadByte(cls, address: hex):
         byte_data = ctypes.c_byte()
@@ -270,6 +272,13 @@ class Memory:
             None
         )
 
+    @classmethod
+    def WriteBytes(cls, address: hex, data: List[hex]):
+        size = len(data)
+        bytes_data = bytes([byte & 0xFF for byte in data])
+        bytes_data = (ctypes.c_ubyte * size).from_buffer_copy(bytes_data)
+        cls.__WriteIntoMemory(address, bytes_data, length=size)
+
 
 class Chat:
     """向游戏中发送聊天信息"""
@@ -312,9 +321,41 @@ class Chat:
         Memory.WriteByte(send_address, 1)
 
 
+# 游戏功能开关集合
+class Patchs:
+
+    # 碰撞检测开关
+    class Collision:
+        # MonsterHunterWorld.exe+1F51810 - E8 3B662CFF           - call MonsterHunterWorld.exe+1217E50
+        address = 0x141F51810
+        origin_codes = [0xE8, 0x3B, 0x66, 0x2C, 0xFF]
+        nop_codes = [0x90 for _ in range(len(origin_codes))]
+
+        @classmethod
+        def setEnable(cls, enable: bool):
+            if enable:
+                Memory.WriteBytes(cls.address, cls.origin_codes)
+            else:
+                Memory.WriteBytes(cls.address, cls.nop_codes)
+
+    # 动作帧冻结开关
+    class ActionFrame:
+        # MonsterHunterWorld.exe+224DE89 - F3 0F11 46 5C         - movss [rsi+5C],xmm0
+        address = 0x14224DE89
+        origin_codes = [0xF3, 0x0F, 0x11, 0x46, 0x5C]
+        nop_codes = [0x90 for _ in range(len(origin_codes))]
+
+        @classmethod
+        def setEnable(cls, enable: bool):
+            if enable:
+                Memory.WriteBytes(cls.address, cls.origin_codes)
+            else:
+                Memory.WriteBytes(cls.address, cls.nop_codes)
+
+
 Process.Initialize()
 Window.Initialize()
 
 
 if __name__ == '__main__':
-    pass
+    Patchs.ActionFrame.setEnable(True)
