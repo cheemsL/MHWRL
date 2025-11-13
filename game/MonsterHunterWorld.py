@@ -400,17 +400,18 @@ class Patchs:
 
     # 保留最后一滴血
     class KeepLive:
-        # MonsterHunterWorld.exe+1216979 - F3 0F11 41 64         - movss [rcx+64],xmm0
-        allocAddress = None # Memory.AllocMemory(256)
 
         # MonsterHunterWorld.exe+1216979 - F3 0F11 41 64         - movss [rcx+64],xmm0
         startAddress = 0x141216979
         # MonsterHunterWorld.exe+121697E - C3                    - ret
         endAddress = 0x14121697E
-
+        # 游戏原数据
         originInstructions = [
             0xF3, 0x0F, 0x11, 0x41, 0x64
         ]
+
+        # MonsterHunterWorld.exe+1216979 - F3 0F11 41 64         - movss [rcx+64],xmm0
+        allocAddress = None # Memory.AllocMemory(256)
 
         # 50                    - push rax
         # F3 48 0F2D C0         - cvtss2si rax,xmm0
@@ -422,7 +423,7 @@ class Patchs:
         # F3 0F11 41 64         - movss [rcx+64],xmm0
         targetInstruction = [
             0x50,
-            0xF3, 0X48, 0x0F, 0x2D, 0xC0,
+            0xF3, 0x48, 0x0F, 0x2D, 0xC0,
             0x48, 0x83, 0xF8, 0x01,
             0x0F, 0x8D, 0x0F, 0x00, 0x00, 0x00,
             0x48, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -431,7 +432,7 @@ class Patchs:
             0xF3, 0x0F, 0x11, 0x41, 0x64,
         ]
         targetInstructionSize = len(targetInstruction)
-        allocAddressSize = (targetInstructionSize // 256 + 1) * 256
+        allocAddressSize = (targetInstructionSize // 64 + 1) * 64
 
         @classmethod
         def setEnable(cls, enable: bool):
@@ -472,9 +473,3 @@ class Patchs:
 Process.Initialize()
 Window.Initialize()
 
-
-if __name__ == '__main__':
-    Patchs.KeepLive.setEnable(True)
-    time.sleep(60)
-    Patchs.KeepLive.setEnable(False)
-    # Memory.ReleaseMemory(0x150000000)

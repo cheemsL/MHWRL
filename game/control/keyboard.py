@@ -111,7 +111,7 @@ class Keyboard:
     def Click(cls, key):
         def __click():
             cls.__Press(key)
-            time.sleep(0.01)
+            time.sleep(0.1)
             cls.__Release(key)
         threat = Thread(target=__click)
         threat.daemon = True

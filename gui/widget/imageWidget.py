@@ -24,16 +24,6 @@ class ImageWidget(QLabel):
 
         self.setFixedSize(256, 144)
 
-        self.update_timer = QTimer(self)
-        self.update_timer.timeout.connect(self.captureGame)
-        self.update_timer.start(1)
-
-    def captureGame(self):
-        start_time = time.time()
-        image = MonsterHunterWorld.Window.Screenshot(resize=(256, 144))
-        print(f"\r{time.time() - start_time}", end="", flush=True)
-        self.setImage(image)
-
     def setImage(self, image: np.ndarray = None):
         if image is None:
             self.__pixmap = None
