@@ -146,6 +146,7 @@ class MHWGamepad:
     @classmethod
     def Charge(cls):
         """蓄力，按下Y"""
+        VX360Gamepad.Release(VX360Gamepad.Button.RIGHT_SHOULDER)
         VX360Gamepad.Press(VX360Gamepad.Button.Y)
 
     @classmethod
