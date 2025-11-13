@@ -296,15 +296,21 @@ class Memory:
         cls.__WriteIntoMemory(address, bytes_data, length=size)
 
     @classmethod
-    def AllocMemory(cls, size: int = 2048):
+    def AllocMemory(cls, size: int = 2048, allocAddressRange: List = None):
         """在游戏进程里申请一片大小为size的内存"""
-        address = cls.__Kernal32.VirtualAllocEx(
-            int(Process.ProcessHandle()),
-            ctypes.c_void_p(0x160000000),        # 在游戏内存附近申请内存
-            size,
-            0x1000 | 0x2000,    # MEM_COMMIT | MEM_RESERVE
-            0x40,               # PAGE_EXECUTE_READWRITE
-        )
+        address = None
+        if allocAddressRange is None:
+            allocAddressRange = [0x0]
+        for nearAddress in allocAddressRange:
+            address = cls.__Kernal32.VirtualAllocEx(
+                int(Process.ProcessHandle()),
+                ctypes.c_void_p(nearAddress),        # 在游戏内存附近申请内存
+                size,
+                0x1000 | 0x2000,    # MEM_COMMIT | MEM_RESERVE
+                0x40,               # PAGE_EXECUTE_READWRITE
+            )
+            if address is not None:
+                break
         return address
 
     @classmethod
@@ -367,109 +373,5 @@ class Chat:
         Memory.WriteByte(send_address, 1)
 
 
-# 游戏功能开关集合
-class Patchs:
-
-    # 碰撞检测开关
-    class Collision:
-        # MonsterHunterWorld.exe+1F51810 - E8 3B662CFF           - call MonsterHunterWorld.exe+1217E50
-        address = 0x141F51810
-        origin_codes = [0xE8, 0x3B, 0x66, 0x2C, 0xFF]
-        nop_codes = [0x90 for _ in range(len(origin_codes))]
-
-        @classmethod
-        def setEnable(cls, enable: bool):
-            if enable:
-                Memory.WriteBytes(cls.address, cls.origin_codes)
-            else:
-                Memory.WriteBytes(cls.address, cls.nop_codes)
-
-    # 动作帧冻结开关
-    class ActionFrame:
-        # MonsterHunterWorld.exe+224DE89 - F3 0F11 46 5C         - movss [rsi+5C],xmm0
-        address = 0x14224DE89
-        origin_codes = [0xF3, 0x0F, 0x11, 0x46, 0x5C]
-        nop_codes = [0x90 for _ in range(len(origin_codes))]
-
-        @classmethod
-        def setEnable(cls, enable: bool):
-            if enable:
-                Memory.WriteBytes(cls.address, cls.origin_codes)
-            else:
-                Memory.WriteBytes(cls.address, cls.nop_codes)
-
-    # 保留最后一滴血
-    class KeepLive:
-
-        # MonsterHunterWorld.exe+1216979 - F3 0F11 41 64         - movss [rcx+64],xmm0
-        startAddress = 0x141216979
-        # MonsterHunterWorld.exe+121697E - C3                    - ret
-        endAddress = 0x14121697E
-        # 游戏原数据
-        originInstructions = [
-            0xF3, 0x0F, 0x11, 0x41, 0x64
-        ]
-
-        # MonsterHunterWorld.exe+1216979 - F3 0F11 41 64         - movss [rcx+64],xmm0
-        allocAddress = None # Memory.AllocMemory(256)
-
-        # 50                    - push rax
-        # F3 48 0F2D C0         - cvtss2si rax,xmm0
-        # 48 83 F8 01           - cmp rax,01
-        # 0F8D 0F000000         - jnl 13FFD001F
-        # 48 B8 0100000000000000 - mov rax,0000000000000001
-        # F3 48 0F2A C0         - cvtsi2ss xmm0,rax
-        # 58                    - pop rax
-        # F3 0F11 41 64         - movss [rcx+64],xmm0
-        targetInstruction = [
-            0x50,
-            0xF3, 0x48, 0x0F, 0x2D, 0xC0,
-            0x48, 0x83, 0xF8, 0x01,
-            0x0F, 0x8D, 0x0F, 0x00, 0x00, 0x00,
-            0x48, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0xF3, 0x48, 0x0F, 0x2A, 0xC0,
-            0x58,
-            0xF3, 0x0F, 0x11, 0x41, 0x64,
-        ]
-        targetInstructionSize = len(targetInstruction)
-        allocAddressSize = (targetInstructionSize // 64 + 1) * 64
-
-        @classmethod
-        def setEnable(cls, enable: bool):
-            if enable:
-                # 分配内存
-                cls.allocAddress = Memory.AllocMemory(
-                    cls.allocAddressSize
-                )
-                if cls.allocAddress is None:
-                    # print(f"{cls.__class__.__name__}.setEnable({enable}) 分配内存失败!")
-                    return
-                # print(f"分配内存: {hex(cls.allocAddress)}")
-                # 获取跳转回来指令
-                jumpBackInstruction = Memory.JumpInstruction(
-                    fromAddress=cls.allocAddress + cls.targetInstructionSize,
-                    toAddress=cls.endAddress
-                )
-                # 计算完整指令
-                instruction = cls.targetInstruction.copy() + jumpBackInstruction
-                # 写入内存
-                Memory.WriteBytes(cls.allocAddress, instruction)
-                # 跳转过去指令
-                jumpIntoInstruction = Memory.JumpInstruction(
-                    fromAddress=cls.startAddress,
-                    toAddress=cls.allocAddress
-                )
-                # 写入游戏内存
-                Memory.WriteBytes(cls.startAddress, jumpIntoInstruction)
-            else:
-                # 游戏内存数据归滚
-                Memory.WriteBytes(cls.startAddress, cls.originInstructions)
-                # 释放分配内存
-                if cls.allocAddress is not None:
-                    Memory.ReleaseMemory(cls.allocAddress)
-                    cls.allocAddress = None
-
-
 Process.Initialize()
 Window.Initialize()
-
