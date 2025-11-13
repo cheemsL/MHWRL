@@ -124,39 +124,44 @@ class VX360Gamepad:
 class MHWGamepad:
 
     @classmethod
+    def ViewLock(cls):
+        """视角锁定，点击RS"""
+        VX360Gamepad.Click(VX360Gamepad.Button.RIGHT_THUMB)
+
+    @classmethod
     def Move(cls):
-        """移动"""
+        """快速移动，按下RB"""
         VX360Gamepad.Press(VX360Gamepad.Button.RIGHT_SHOULDER)
 
     @classmethod
+    def Evada(self):
+        """翻滚，点击A"""
+        VX360Gamepad.Click(VX360Gamepad.Button.A)
+
+    @classmethod
+    def SlingerBurst(self):
+        """强化射击，点击LT"""
+        VX360Gamepad.ClickLeftTrigger()
+
+    @classmethod
     def Charge(cls):
-        """蓄力"""
+        """蓄力，按下Y"""
         VX360Gamepad.Press(VX360Gamepad.Button.Y)
 
     @classmethod
     def ChargeSlash(cls):
-        """蓄力斩"""
+        """蓄力，斩松开Y"""
         VX360Gamepad.Release(VX360Gamepad.Button.Y)
 
     @classmethod
     def Tackle(cls):
-        """冲撞攻击"""
+        """冲撞攻击，同时点击Y+B"""
         VX360Gamepad.Click(VX360Gamepad.Button.B)
         VX360Gamepad.Click(VX360Gamepad.Button.Y)
 
     @classmethod
-    def SlingerBurst(self):
-        """强化射击"""
-        VX360Gamepad.ClickLeftTrigger()
-
-    @classmethod
-    def Evada(self):
-        """翻滚"""
-        VX360Gamepad.Click(VX360Gamepad.Button.A)
-
-    @classmethod
     def SideBlow(cls):
-        """横击"""
+        """横击，同时点击RT+Y"""
         VX360Gamepad.Click(VX360Gamepad.Button.Y)
         VX360Gamepad.ClickRightTrigger()
 
@@ -166,11 +171,6 @@ QuitEvent.Append(VX360Gamepad.Delete)
 
 if __name__ == '__main__':
     # 移动
-    VX360Gamepad.LeftJoystick(0, 1)
-    time.sleep(2)
-    VX360Gamepad.LeftJoystick(0, -1)
-    time.sleep(2)
-    VX360Gamepad.LeftJoystick(1, 0)
-    time.sleep(2)
-    VX360Gamepad.LeftJoystick(-1, 0)
-    time.sleep(2)
+    time.sleep(1)
+    MHWGamepad.ViewLock()
+    time.sleep(1)
