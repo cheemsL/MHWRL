@@ -323,14 +323,6 @@ class Memory:
             0x8000
         )
 
-    @classmethod
-    def JumpInstruction(cls, fromAddress: hex, toAddress: hex):
-        offset = toAddress - (fromAddress + 5)  # jmp rel32
-        offset = offset & 0xFFFFFFFF    # 转为 32-bit 无符号表示（两补数）
-        bytes = offset.to_bytes(4, 'little')
-        instruction = [0xE9] + [int(byte) for byte in bytes]
-        return instruction
-
 
 class Chat:
     """向游戏中发送聊天信息"""
